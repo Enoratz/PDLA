@@ -1,0 +1,38 @@
+# Nom de l'automate qui apparaîtra dans l'onglet "Actions" de GitHub
+name: Run Tests
+
+# Quand déclencher le workflow ?
+on:
+  push:
+    branches-ignore:
+      - main  # Déclenche à chaque push sauf sur main (déjà protégée)
+  pull_request:
+    branches:
+      - main  # Déclenche dès qu'une Pull Request est ouverte vers main
+
+jobs:
+  test:
+    runs-on: ubuntu-latest  # Utilise un serveur Linux vierge fourni par GitHub
+
+    steps:
+      # 1. Récupère le code de ton dépôt GitHub sur le serveur
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2. Installe l'outil 'uv' sur la machine Linux
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+
+      # 3. Installe la bonne version de Python (3.12)
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      # 4. Installe les dépendances du projet (dont pytest) via uv.lock
+      - name: Install dependencies
+        run: uv sync --locked
+
+      # 5. Exécute la suite de tests avec pytest
+      - name: Run pytest
+        run: uv run pytest
